@@ -1,1 +1,6 @@
-@import "tailwindcss"
+@import "tailwindcss";
+
+:not(pre) > code[class*="language-"], pre[class*="language-"] {
+  background: transparent !important;
+  margin:0 !important;
+}
