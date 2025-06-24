@@ -1,50 +1,60 @@
 import React, { useEffect, useState } from "react";
 import "prismjs/themes/prism-tomorrow.css";
 import prism from "prismjs";
-import Editor from 'react-simple-code-editor'
+import Editor from "react-simple-code-editor";
 import axios from "axios";
+import Markdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight"
+import "highlight.js/styles/github-dark.css"; 
 
 const App = () => {
-  const [code, setcode] = useState(`function sum(){
-    return a+b
-}`)
-  const [review, setreview] = useState("")
+  const [code, setCode] = useState(`function sum(a, b) {
+  return a + b;
+}`);
+  const [review, setReview] = useState("");
 
   useEffect(() => {
     prism.highlightAll();
-  });
+  }, [code]);
 
-  async function reviewCode(){
-    const response = await axios.post("http://localhost:3000/ai/get-response", { code });
-    setreview(response.data);
+  async function reviewCode() {
+    try {
+      const response = await axios.post("http://localhost:3000/ai/get-response", { code });
+      setReview(response.data);
+    } catch (err) {
+      setReview("Error fetching review. Check server.");
+    }
   }
 
   return (
-    <div className="w-full h-screen bg-zinc-900">
-      <main className="h-[98%] w-full p-[1.5rem] flex gap-[1rem] items-center justify-center">
-        <div className="left relative h-full basis-1/2 bg-black rounded-[0.7rem]">
-          <div className="code  ">
-            
+    <div className="w-full min-h-screen bg-zinc-900 text-white">
+      <main className="flex flex-col md:flex-row gap-4 p-4 h-full">
+        {/* Code Editor */}
+        <div className="flex-1 relative bg-black rounded-2xl p-4 shadow-lg overflow-auto scrollbar-hide">
           <Editor
-              value={code}
-              onValueChange={code => setcode(code)}
-              highlight={code => prism.highlight(code, prism.languages.javascript)}
-              padding={10}
-              style={{
-                fontFamily: '"Fira code", "Fira Mono", monospace',
-                fontSize: 16,
-                color: 'white',
-                overflow: 'auto'
-              }}
-            />
-            
-          </div>
-          <div onClick={reviewCode} className="review absolute bottom-[1rem] right-[1rem] bg-[rgb(219,219,255)] text-black px-[2rem] py-[0.5rem] rounded-[0.7rem] cursor-pointer font-bold select-none hover:scale-102">
+            value={code}
+            onValueChange={(code) => setCode(code)}
+            highlight={(code) => prism.highlight(code, prism.languages.javascript, 'javascript')}
+            padding={16}
+            className="focus:outline-none min-h-[300px]"
+            style={{
+              fontFamily: 'Fira Code, monospace',
+              fontSize: 14,
+            }}
+          />
+          <button
+            onClick={reviewCode}
+            className="absolute bottom-4 right-4 bg-indigo-400 text-black px-4 py-2 rounded-lg font-semibold hover:scale-105 transition-all"
+          >
             Review
-          </div>
+          </button>
         </div>
-        <div className="right h-full basis-1/2 bg-zinc-800 text-white rounded-[0.7rem]">
-        {review}
+
+
+        <div className="flex-1 bg-zinc-800 rounded-2xl p-4 shadow-lg overflow-auto scrollbar-hide min-h-[300px] text-lg">
+          <Markdown rehypePlugins={[rehypeHighlight]}>
+            {review || "Code review will appear here..."}
+          </Markdown>
         </div>
       </main>
     </div>
