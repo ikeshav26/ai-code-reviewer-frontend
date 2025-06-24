@@ -2,15 +2,22 @@ import React, { useEffect, useState } from "react";
 import "prismjs/themes/prism-tomorrow.css";
 import prism from "prismjs";
 import Editor from 'react-simple-code-editor'
+import axios from "axios";
 
 const App = () => {
   const [code, setcode] = useState(`function sum(){
     return a+b
 }`)
+  const [review, setreview] = useState("")
 
   useEffect(() => {
     prism.highlightAll();
   });
+
+  async function reviewCode(){
+    const response = await axios.post("http://localhost:3000/ai/get-response", { code });
+    setreview(response.data);
+  }
 
   return (
     <div className="w-full h-screen bg-zinc-900">
@@ -32,11 +39,13 @@ const App = () => {
             />
             
           </div>
-          <div className="review absolute bottom-[1rem] right-[1rem] bg-[rgb(219,219,255)] text-black px-[2rem] py-[0.5rem] rounded-[0.7rem] cursor-pointer font-bold select-none hover:scale-102">
+          <div onClick={reviewCode} className="review absolute bottom-[1rem] right-[1rem] bg-[rgb(219,219,255)] text-black px-[2rem] py-[0.5rem] rounded-[0.7rem] cursor-pointer font-bold select-none hover:scale-102">
             Review
           </div>
         </div>
-        <div className="right h-full basis-1/2 bg-zinc-800 rounded-[0.7rem]"></div>
+        <div className="right h-full basis-1/2 bg-zinc-800 text-white rounded-[0.7rem]">
+        {review}
+        </div>
       </main>
     </div>
   );
